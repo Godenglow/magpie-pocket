@@ -1,0 +1,55 @@
+{
+ "passphrase": "fixture-passphrase-\u5408\u6210\u6837\u672c\u4e13\u7528",
+ "iterations": 600000,
+ "files": [
+  {
+   "name": "0123456789abcdef0123456789abcdef-2026-03-31.magpie-usage",
+   "sealedBase64": "eyJmb3JtYXQiOiJtYWdwaWUtZGF0YSIsInZlcnNpb24iOjEsImtkZiI6InBia2RmMi1zaGEyNTYiLCJpdGVyYXRpb25zIjo2MDAwMDAsInNhbHQiOiJBQUVDQXdRRkJnY0lDUW9MREEwT0R3PT0iLCJub25jZSI6IkFBRUNBd1FGQmdjSUNRb0wiLCJkYXRhIjoiZjg2cm41UWJWUWczTHJIRUMrc1ZaYWdoOU9iQVNNbnBjMnhwUGs0REJId2c1YVljamVENVl0Q0Y2dU95Z2tiaVB5TlZKRCtNVmZOcGRlZ1lXdUVsV3RYbDhQNnJ4RndBeUpqaWdqNkc0ekxWT1pOUWNVS29PdjdxZXZoblpqc1luckl5dlFUUWhNR01PT2FKMmM4d2xheUJCcEFvS2FENHl1YkhmQTVNZjZzRERSTEw5UXU5b2RIaXZRUWNpRTJ1VTZ1UTc0STVLUWd4R1JXdDlzQnpiRmNtNVdYS1Q1Tk9OL096R2xWOERlL05jaXRRdENrY1M2ak5iZzhSSkFwUVNvWWFQQW1qcERRaDVVMW15ZmRrK3JsUm5GZ0lKQXRONVhxMC8vMlU0bmhKSWNXVnk2TTNJbFhOWnhFNmZia3dEVmdpcnIxaURJR3pJdHBka3JUVUpoNmdvNmprK2VvU2V2ay84eVBWVGNsRjl2QVBibjJCRHlJQmpPQnNSaDRkazdscUczWHhrTlBMeFF2Wm5LcmJJZUlCbm15ZktTNEtBeThqZ3lML1NxVXR6QzdGTi95OGQ5elFHbkM3TDVRR2NUdW55S2VLSjFqbmZpSnZ6bWpneTVDcUZnL2ZiVGRhS2lhTUtYKzE0WnF1UFducGJ0U0JRaDN1U3pFbEYxQytCOVVoZkJXb091WjErWWZKaG9Tb2gxTjRabnpsdzNBR01pNi9yN1dqVlNIRlhtNHhlMXh5MTdaK2pwVVhoa2diVjVacUMwaERaZWdGcktQSnUxaFpTYjFVRWZFS2MyaHNIYkpxY25vM0RZUTJPOGtLdjdmUVp3PT0ifQ==",
+   "expected": {
+    "calls": 7,
+    "errors": 1,
+    "retried": 1,
+    "canceled": 1,
+    "allTokens": 14383,
+    "hitRateNumerator": 3000,
+    "hitRateDenominator": 8211,
+    "costUsd": 0.012,
+    "unpriced": 6,
+    "input": 10211,
+    "output": 1172,
+    "cacheRead": 3000,
+    "cacheWrite": 0,
+    "cacheUnknownCalls": 1,
+    "cacheUnknownTokens": 5000
+   }
+  },
+  {
+   "name": "fedcba9876543210fedcba9876543210-2026-04-01.magpie-usage",
+   "sealedBase64": "eyJmb3JtYXQiOiJtYWdwaWUtZGF0YSIsInZlcnNpb24iOjEsImtkZiI6InBia2RmMi1zaGEyNTYiLCJpdGVyYXRpb25zIjo2MDAwMDAsInNhbHQiOiJFQkVTRXhRVkZoY1lHUm9iSEIwZUh3PT0iLCJub25jZSI6IkRBME9EeEFSRWhNVUZSWVgiLCJkYXRhIjoiMllydEtwdUpJUHFPSjZHTlhJMGFtTHBRSGRiczNyNktqQ0lQeVRuOWtyL0NYcHNLT3JxOTBwOE51UnhjQzJTcHluSjhOZzlZTzBCaUsrY2x5aDZEVkt2VGlqc3ptK2hRWThxVHIxSUM0dEQ2VWlyR0NEWm93bUd3SHBTNWhuTzc3SWd0dnE1RVYwQVM2TnlhUjBSWmM1SXJoRXVCZG10RURJUmdua0JoYXUvdFpxZGswMnZoZEJQdGZJR0ZjYWhWamJRTjZCNFF3bW5SOGNaT3NvaXdnOXpqbHB1bkQyeVZKZGowaXo4RnBxQXFqb2Z0MGRneG5wdW4yNzJJSmw3dk05QXl6aDBWZ2ZJRXAwdHdvNE5qQ1A1K2JjdU0ifQ==",
+   "expected": {
+    "calls": 1,
+    "errors": 0,
+    "retried": 0,
+    "canceled": 0,
+    "allTokens": 120,
+    "hitRateNumerator": 0,
+    "hitRateDenominator": 100,
+    "costUsd": 0.001,
+    "unpriced": 0,
+    "input": 100,
+    "output": 20,
+    "cacheRead": 0,
+    "cacheWrite": 0,
+    "cacheUnknownCalls": 0,
+    "cacheUnknownTokens": 0
+   }
+  },
+  {
+   "name": "0123456789abcdef0123456789abcdef-2026-04-02.magpie-usage",
+   "sealedBase64": "eyJmb3JtYXQiOiJtYWdwaWUtZGF0YSIsInZlcnNpb24iOjEsImtkZiI6InBia2RmMi1zaGEyNTYiLCJpdGVyYXRpb25zIjo2MDAwMDAsInNhbHQiOiJJQ0VpSXlRbEppY29LU29yTEMwdUx3PT0iLCJub25jZSI6IkdCa2FHeHdkSGg4Z0lTSWoiLCJkYXRhIjoiR3pjUkZqOTUyVVZPcnZJOWpDa3VNc2dkekhyRU1xZWoxRllVS0ZKQWFJT1J1RGJ6eTN1ZkdUQ0ZRRWpKd1dMVitxdEJJQXRQd2lKVWl1M202NGZOb3lKbmpJNmpjM0ZMV0RRN1VLQVdmazZ1Z3ZHT096M1BBQTM3NnY2bHFpVW5Fc2Rrdm1sQXpLYS9jVk5zaDVLbFlCSmc2OStkUTkyMTRNemJqd0hlTkY3Q3JmdHE3enY3czlBa2JISTJsYTNzQkNOeG0wQU1xQ21EcDBnaTY2S1V3a2MvWERGRnpFcXpqcTZESzFMWjFCbnpkK1N3cVE9PSJ9",
+   "expected": {
+    "wrongPassphrase": true
+   }
+  }
+ ]
+}
