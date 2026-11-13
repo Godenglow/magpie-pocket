@@ -1,0 +1,165 @@
+name: Release
+
+# 推送 v<versionName> 标签时构建并发布：校验版本、跑测试、用 release 密钥签名，
+# 核对签名证书指纹后创建 GitHub Release。详见 docs/RELEASING.md。
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # release 签名证书的 SHA-256 指纹（无冒号小写）；与 docs/RELEASING.md 保持一致。
+  EXPECTED_CERT_SHA256: c0282dba023c7f62b1ec9b6e87dc7971b133c99f40b64d4ea40e2d92986f7bec
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check tag against versionName
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          version=$(sed -n 's/^ *versionName *= *"\([^"]*\)".*/\1/p' app/build.gradle.kts)
+          code=$(sed -n 's/^ *versionCode *= *\([0-9][0-9]*\).*/\1/p' app/build.gradle.kts)
+          echo "tag=${GITHUB_REF_NAME} versionName=${version} versionCode=${code}"
+          test -n "$version"
+          test -n "$code"
+          if [ "$tag_version" != "$version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match versionName ${version}"
+            exit 1
+          fi
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+          echo "APK_NAME=magpie-pocket-${version}.apk" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+
+      - name: Install SDK
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MAGPIE_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::MAGPIE_KEYSTORE_BASE64 is not configured; refusing to publish a debug-signed release"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/signing"
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/signing/release.jks"
+          echo "MAGPIE_KEYSTORE_PATH=$RUNNER_TEMP/signing/release.jks" >> "$GITHUB_ENV"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Test and build
+        env:
+          MAGPIE_KEYSTORE_PASSWORD: ${{ secrets.MAGPIE_KEYSTORE_PASSWORD }}
+          MAGPIE_KEY_ALIAS: ${{ secrets.MAGPIE_KEY_ALIAS }}
+          MAGPIE_KEY_PASSWORD: ${{ secrets.MAGPIE_KEY_PASSWORD }}
+        run: ./gradlew testDebugUnitTest assembleRelease --no-daemon
+
+      - name: Verify signature and checksum
+        run: |
+          set -euo pipefail
+          apk=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          if [ -z "$apk" ]; then
+            echo "::error::No release APK was produced"
+            exit 1
+          fi
+          echo "APK: $apk"
+          build_tools=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -n 1)
+          certs=$("$build_tools/apksigner" verify --print-certs "$apk")
+          echo "$certs"
+          if ! echo "$certs" | grep -qi "$EXPECTED_CERT_SHA256"; then
+            echo "::error::APK is not signed with the expected release certificate"
+            exit 1
+          fi
+          cp "$apk" "$APK_NAME"
+          sha256sum "$APK_NAME" > "$APK_NAME.sha256"
+          cat "$APK_NAME.sha256"
+
+      - name: Build release notes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import pathlib
+
+          version = os.environ["VERSION"]
+          lines = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8").splitlines()
+
+          section = []
+          capture = False
+          for line in lines:
+              if line.startswith("## "):
+                  capture = line[3:].strip().startswith(version)
+                  continue
+              if capture:
+                  section.append(line)
+
+          body = "\n".join(section).strip()
+          if not body:
+              raise SystemExit("CHANGELOG.md has no section for " + version)
+
+          digest = os.environ["EXPECTED_CERT_SHA256"].upper()
+          fingerprint = ":".join(digest[i:i + 2] for i in range(0, len(digest), 2))
+
+          footer = f"""
+          ---
+
+          ### 安装
+
+          1. 下载 `magpie-pocket-{version}.apk`，需要 Android 8.0（API 26）及以上。
+          2. 允许“安装未知来源应用”后安装；系统提示来源未知属于正常现象。
+          3. 打开应用进入设置，填写 WebDAV 地址、账号、应用密码、用量目录和 Magpie 同步口令，先点“测试连接”，再点“保存并同步”。
+
+          之前从 GitHub Actions 下载过 debug 包的用户需要先卸载一次（签名不同，无法覆盖安装）；卸载会清除本机归档和已保存的连接信息。之后的版本可直接覆盖升级。
+
+          ### 校验
+
+          - `magpie-pocket-{version}.apk.sha256`：安装包校验和。
+          - 签名证书 SHA-256 指纹：`{fingerprint}`，可用 `apksigner verify --print-certs` 复核。
+
+          本项目是非官方客户端，参考费用和额度读数不代表供应商账单，详见仓库 README。
+          """
+
+          pathlib.Path("release-notes.md").write_text(body + "\n" + footer, encoding="utf-8")
+          print(body + footer)
+          PY
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "Magpie Pocket $VERSION" --notes-file release-notes.md
+            gh release upload "$GITHUB_REF_NAME" "$APK_NAME" "$APK_NAME.sha256" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --title "Magpie Pocket $VERSION" \
+              --notes-file release-notes.md \
+              "$APK_NAME" "$APK_NAME.sha256"
+          fi

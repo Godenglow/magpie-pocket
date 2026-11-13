@@ -25,6 +25,12 @@ Magpie Pocket 是一个非官方、独立维护的 Android 用量看板，配合
 
 [额度概览](docs/images/overview-light.png) · [外观与连接设置](docs/images/settings.png)
 
+## 下载
+
+从 [Releases](https://github.com/Godenglow/magpie-pocket/releases) 下载最新的 `magpie-pocket-<版本>.apk`，需要 Android 8.0（API 26）及以上。安装包用固定密钥签名，之后的新版本可以直接覆盖升级。
+
+升级时不要卸载：卸载会清空本机归档和已保存的连接信息。之前装过 GitHub Actions 里的 debug APK 的话，因签名不同必须先卸载一次再装正式包。
+
 ## 使用条件与连接
 
 需要 Android 8.0（API 26）及以上，以及已启用共享用量的 Magpie 桌面端。内置默认地址面向坚果云；其他兼容 WebDAV 的服务需要自行验证。
@@ -39,22 +45,22 @@ Magpie Pocket 是一个非官方、独立维护的 Android 用量看板，配合
 
 ## 获取与构建
 
-当前源码版本：**0.10.0**。本仓库初始发布以源码为主，不将本机 debug APK、签名文件或构建缓存提交到 Git。
+当前源码版本：**0.10.0**。仓库不提交构建产物、签名文件或构建缓存；正式安装包由标签触发的发布流程构建，见[发布流程](docs/RELEASING.md)。
 
-使用 Android Studio 或 Gradle Wrapper 构建，详见[构建指南](docs/BUILDING.md)。GitHub Actions 成功后可下载 debug APK artifact（通常需要登录 GitHub）；debug 包只适合试用，发布签名及升级兼容性由后续发布流程管理。
+使用 Android Studio 或 Gradle Wrapper 构建，详见[构建指南](docs/BUILDING.md)：
 
 ```bash
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-Windows 使用 `gradlew.bat testDebugUnitTest assembleDebug`。
+Windows 使用 `gradlew.bat testDebugUnitTest assembleDebug`。CI 每次推送也会上传 debug APK artifact（需登录 GitHub），仅供临时试用，不能与正式安装包互相覆盖安装。
 
 ## 文档
 
 - [数据来源、统计公式、价格估算与桌面差异](docs/DATA_AND_CALCULATIONS.md)
 - [隐私与凭据处理](docs/PRIVACY.md)
 - [架构与同步协议](docs/ARCHITECTURE.md)
-- [构建与测试](docs/BUILDING.md)
+- [构建与测试](docs/BUILDING.md) · [发布流程](docs/RELEASING.md)
 - [已知限制与排查](docs/LIMITATIONS.md)
 - [贡献指南](CONTRIBUTING.md) · [安全问题](SECURITY.md)
 

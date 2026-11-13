@@ -54,9 +54,20 @@ python tools/fixtures/make_price_snapshot.py /path/to/api.json
 
 ## 签名与安装
 
-仓库不包含任何私钥或签名密码。assembleDebug 使用构建环境自己的 debug key，因此不同开发者/CI 的包可能无法互相覆盖安装。已有应用采用另一把签名密钥时，需要匹配签名或卸载重装；卸载可能清除本机历史和凭据。
+仓库不包含任何私钥或签名口令。release 签名来自环境变量（CI 用仓库 Secrets）或未提交的 `keystore.properties`：
 
-正式分发需自行配置稳定的 release 签名。不要提交 keystore、key.properties 或真实密码。
+```properties
+storeFile=/absolute/path/to/release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+对应环境变量是 `MAGPIE_KEYSTORE_PATH`、`MAGPIE_KEYSTORE_PASSWORD`、`MAGPIE_KEY_ALIAS`、`MAGPIE_KEY_PASSWORD`。两者都没有时，`assembleRelease` 会用构建机的 debug key 兜底，并在配置阶段打印提示；这种包只能自测，不能作为发布包。
+
+`assembleDebug` 使用构建环境自己的 debug key，因此不同开发者/CI 的包可能无法互相覆盖安装。已有应用采用另一把签名密钥时，需要匹配签名或卸载重装；卸载可能清除本机历史和凭据。
+
+正式包的构建与发布见[发布流程](RELEASING.md)。
 
 ## 验证范围
 
