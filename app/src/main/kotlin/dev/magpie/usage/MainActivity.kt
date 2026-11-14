@@ -98,8 +98,11 @@ class MainActivity : ComponentActivity() {
                                     NavigationBarItem(
                                         selected = route == "overview",
                                         onClick = {
+                                            // 回到栈底再切换：两个 tab 互为顶层目的地，
+                                            // 不互相堆栈——返回键一次就能退出应用，
+                                            // 来回点多少次都不会把返回栈垫高。
                                             nav.navigate("overview") {
-                                                popUpTo("usage") { saveState = true }
+                                                popUpTo("overview") { saveState = true; inclusive = true }
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }
@@ -118,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                         selected = route == "usage",
                                         onClick = {
                                             nav.navigate("usage") {
-                                                popUpTo("overview") { saveState = true }
+                                                popUpTo("overview") { saveState = true; inclusive = true }
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }

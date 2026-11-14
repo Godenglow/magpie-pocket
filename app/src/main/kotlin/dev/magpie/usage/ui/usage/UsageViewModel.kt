@@ -95,11 +95,17 @@ class UsageViewModel(app: Application) : AndroidViewModel(app) {
                 reload()
             }
         }
-        // 每一轮同步（前台轮询、手动刷新、后台任务）结束后都刷新页面：
-        // 原先只有手动刷新会 reload，停在页面上时云端新数据不会显示，
-        // 自动刷新的失败也不会变成红色提示。
+        // 每一轮同步（前台轮询、手动刷新、后台任务）结束后都刷新页面。
+        // 冷启动时首轮同步可能在本 collector 挂上之前就完成了（StateFlow
+        // 只重放最新值），所以先检查"已经过去了多少轮"，落后的那轮立即补
+        // 一次 reload——否则打开应用时页面停在上一轮的空缓存上。
         viewModelScope.launch(Dispatchers.IO) {
             var seen = magpie.syncGeneration.value
+            // 先把历史欠账补上（generation 在 collector 之前已增长的情况）。
+            if (magpie.syncGeneration.value > seen) {
+                seen = magpie.syncGeneration.value
+                reload()
+            }
             magpie.syncGeneration.collect { gen ->
                 if (gen == seen) return@collect
                 seen = gen
@@ -113,6 +119,10 @@ class UsageViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 reload()
             }
+        }
+        // 同理：若应用启动时已有历史同步（进程被系统复用），首屏也补一次。
+        if (magpie.syncGeneration.value > 0) {
+            reload()
         }
     }
 
@@ -304,7 +314,9 @@ class UsageViewModel(app: Application) : AndroidViewModel(app) {
         val settings = _state.value.settings
         if (settings?.configured == true) {
             magpie.sync().startForegroundPolling(settings.foregroundMinutes)
-            refresh(initial = true)
+            // 回到前台/冷启动的第一轮：强制立即同步。防抖只该拦住连点刷新，
+            // 不该拦"打开应用"，否则页面开头总是上一轮缓存的空数据。
+            refresh(initial = false)
         } else {
             reload()
         }
